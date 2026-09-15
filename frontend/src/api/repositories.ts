@@ -16,13 +16,18 @@ export const repoApi = {
       .post<Repository>('/repositories', { url, branch, name })
       .then((r) => r.data),
 
-  uploadZip: (file: File, name: string) => {
+  uploadZip: (file: File, name: string, onProgress?: (pct: number) => void) => {
     const form = new FormData()
     form.append('file', file)
     form.append('name', name)
+    // Do NOT set Content-Type manually — browser must set it with the boundary
     return client
       .post<Repository>('/repositories/upload', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (onProgress && e.total) {
+            onProgress(Math.round((e.loaded * 100) / e.total))
+          }
+        },
       })
       .then((r) => r.data)
   },

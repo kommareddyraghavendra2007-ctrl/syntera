@@ -39,6 +39,14 @@ def _run_in_background(repo_id: str, provider, settings) -> None:
             run_ingestion(db, repo, provider, settings)
     finally:
         db.close()
+        # Clean up the uploaded ZIP temp directory after ingestion completes
+        if isinstance(provider, ZipProvider):
+            try:
+                zip_tmp_dir = provider.zip_path.parent
+                if zip_tmp_dir.exists():
+                    shutil.rmtree(zip_tmp_dir, ignore_errors=True)
+            except Exception:
+                pass
 
 
 @router.get("", response_model=list[RepositoryListRead])

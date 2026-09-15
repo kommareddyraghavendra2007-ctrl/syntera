@@ -21,6 +21,19 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cfg = get_settings()
+
+    # ── Ensure required directories exist (handles /tmp paths on Render) ──
+    from pathlib import Path  # noqa: PLC0415
+    Path(cfg.work_dir).mkdir(parents=True, exist_ok=True)
+    Path(cfg.qdrant_path).mkdir(parents=True, exist_ok=True)
+    # Ensure SQLite parent dir exists
+    db_url = cfg.database_url
+    if db_url.startswith("sqlite:///"):
+        db_path = db_url.replace("sqlite:///", "").lstrip("/")
+        if not db_path.startswith("/"):
+            db_path = "/" + db_path
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+
     logger.info(
         "syntera_startup",
         extra={
@@ -118,12 +131,13 @@ def create_app() -> FastAPI:
             "http://localhost:5173",
             "http://localhost:3000",
             "http://127.0.0.1:5173",
-            # Production — Vercel (update with your actual Vercel URL)
+            # Production Vercel deployments
+            "https://sytera.vercel.app",
             "https://syntera.vercel.app",
             "https://syntera-git-main.vercel.app",
-            # Render preview URLs
-            "https://syntera-backend.onrender.com",
+            "https://syntera-kommareddyraghavendra2007-ctrl.vercel.app",
         ],
+        allow_origin_regex=r"https://syntera.*\.vercel\.app",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

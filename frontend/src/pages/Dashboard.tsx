@@ -12,6 +12,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [showAddModal, setShowAddModal] = useState(false)
+  const [initialTab, setInitialTab] = useState<'url' | 'zip'>('url')
 
   const { data: repos = [], isLoading } = useQuery({
     queryKey: ['repositories'],
@@ -46,11 +47,11 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="btn-secondary" onClick={() => setShowAddModal(true)}>
+          <button className="btn-secondary" onClick={() => { setInitialTab('zip'); setShowAddModal(true) }}>
             <Upload size={14} />
             Upload ZIP
           </button>
-          <button className="btn-primary" onClick={() => setShowAddModal(true)}>
+          <button className="btn-primary" onClick={() => { setInitialTab('url'); setShowAddModal(true) }}>
             <Plus size={14} />
             Add Repository
           </button>
@@ -63,7 +64,7 @@ export default function Dashboard() {
           <Spinner className="h-8 w-8 text-syntera-400" />
         </div>
       ) : repos.length === 0 ? (
-        <EmptyState onAdd={() => setShowAddModal(true)} />
+        <EmptyState onAdd={() => { setInitialTab('url'); setShowAddModal(true) }} />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {repos.map((repo) => (
@@ -82,6 +83,7 @@ export default function Dashboard() {
 
       {showAddModal && (
         <AddRepoModal
+          initialTab={initialTab}
           onClose={() => setShowAddModal(false)}
           onCreated={() => {
             setShowAddModal(false)
@@ -171,16 +173,22 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
   )
 }
 
-function AddRepoModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
-  const [tab, setTab] = useState<'url' | 'zip'>('url')
+function AddRepoModal({ onClose, onCreated, initialTab }: { onClose: () => void; onCreated: () => void; initialTab: 'url' | 'zip' }) {
+  const [tab, setTab] = useState<'url' | 'zip'>(initialTab)
   const [url, setUrl] = useState('')
   const [name, setName] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const createMut = useMutation({
-    mutationFn: () =>
-      tab === 'url' ? repoApi.create(url, undefined, name || undefined) : repoApi.uploadZip(file!, name),
+    mutationFn: () => {
+      setUploadProgress(0)
+      if (tab === 'url') {
+        return repoApi.create(url, undefined, name || undefined)
+      }
+      return repoApi.uploadZip(file!, name || file!.name.replace(/\.zip$/i, ''), (pct) => setUploadProgress(pct))
+    },
     onSuccess: onCreated,
     onError: (e: Error) => setError(e.message),
   })
@@ -227,6 +235,21 @@ function AddRepoModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
         </div>
 
         {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
+
+        {createMut.isPending && tab === 'zip' && uploadProgress > 0 && uploadProgress < 100 && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <span>Uploading…</span>
+              <span>{uploadProgress}%</span>
+            </div>
+            <div className="w-full bg-surface-border rounded-full h-1.5">
+              <div
+                className="bg-syntera-500 h-1.5 rounded-full transition-all duration-200"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end gap-3 mt-6">
           <button className="btn-secondary" onClick={onClose}>Cancel</button>

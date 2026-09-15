@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     qdrant_url: str | None = None
     qdrant_api_key: str | None = None
-    qdrant_path: str = str(BACKEND_DIR / "data" / "qdrant")
+    qdrant_path: str = Field(default_factory=lambda: str(BACKEND_DIR / "data" / "qdrant"))
     qdrant_collection: str = "syntera_code_units"
 
     llm_provider: str = "openai"
@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     embedding_dimensions: int | None = None
     embedding_batch_size: int = 32
 
-    work_dir: str = str(BACKEND_DIR / "data" / "work")
+    work_dir: str = Field(default_factory=lambda: str(BACKEND_DIR / "data" / "work"))
     max_repository_size_bytes: int = 80 * 1024 * 1024
     max_file_size_bytes: int = 1_500_000
     max_zip_files: int = 20_000
