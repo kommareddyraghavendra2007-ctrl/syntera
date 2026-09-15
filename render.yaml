@@ -11,7 +11,7 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: DATABASE_URL
-        value: sqlite:////app/data/syntera.db
+        value: sqlite:////tmp/syntera/syntera.db
       - key: QDRANT_URL
         sync: false          # set in Render dashboard
       - key: QDRANT_API_KEY
@@ -29,7 +29,7 @@ services:
       - key: EMBEDDING_API_KEY
         sync: false          # defaults to LLM_API_KEY if left blank
       - key: WORK_DIR
-        value: /app/data/work
+        value: /tmp/syntera/work
       - key: ALLOW_CONFIG_INSPECT
         value: "false"
       - key: MAX_REPOSITORY_SIZE_BYTES
@@ -38,7 +38,3 @@ services:
         value: "120"
       - key: PARSE_CONCURRENCY
         value: "2"
-    disk:
-      name: syntera-data
-      mountPath: /app/data
-      sizeGB: 1
