@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-surface text-gray-100 font-sans antialiased;
+    margin: 0;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-secondary;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-syntera-600 hover:bg-syntera-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-surface-tertiary hover:bg-surface-border text-gray-200 rounded-lg text-sm font-medium transition-colors border border-surface-border;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 text-gray-400 hover:text-gray-200 hover:bg-surface-tertiary rounded-md text-sm transition-colors;
+  }
+  .card {
+    @apply bg-surface-secondary border border-surface-border rounded-xl;
+  }
+  .input {
+    @apply w-full bg-surface-tertiary border border-surface-border text-gray-100 rounded-lg px-3 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-syntera-500 focus:border-syntera-500 transition-colors;
+  }
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+  .badge-blue   { @apply badge bg-syntera-900 text-syntera-300; }
+  .badge-green  { @apply badge bg-green-900/40 text-green-400; }
+  .badge-yellow { @apply badge bg-yellow-900/40 text-yellow-400; }
+  .badge-red    { @apply badge bg-red-900/40 text-red-400; }
+  .badge-gray   { @apply badge bg-surface-tertiary text-gray-400; }
+}
